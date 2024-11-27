@@ -1,0 +1,23 @@
+{
+  "name": "dermi-map",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "connect-mysql2": "^2.2.6",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-mysql-session": "^3.0.3",
+    "mysql2": "^3.11.4",
+    "nodemailer": "^6.9.16",
+    "session": "^0.1.0",
+    "twilio": "^5.3.6"
+  },
+  "description": ""
+}
