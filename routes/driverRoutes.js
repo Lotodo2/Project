@@ -9,5 +9,4 @@ router.get('/stations', driverController.getStations);
 // Define your routes
 router.post('/login', driverController.loginDriver);
 router.get('/nearby-stations', driverController.getNearbyStations);
-
 module.exports = router; // Export the router

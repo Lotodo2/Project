@@ -118,20 +118,41 @@
   /* Key Features Section */
   .features {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-around;
     padding: 20px;
     background-color: #e6e6e6;
+    gap: 20px;
   }
 
   .feature {
+    flex: 1 1 calc(33.33% - 20px);
     width: 30%;
     text-align: center;
+    overflow: hidden;
     padding: 10px;
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+  }
+  .feature:hover {
+    transform: scale(1.05); /* Slight zoom on hover */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* More prominent shadow */
+    background-color: #f3f3f3; /* Lighten the background */
   }
 
+  .feature img {
+    width: 100%; 
+    height: auto; 
+    border-radius: 6px;
+  }
+  .feature:hover img {
+    filter: brightness(1.2); /* Brighten image on hover */
+  }
+  .feature:hover h3 {
+    color: #007BFF; /* Change text color on hover */
+  }
   .feature h3 {
     color: darkgoldenrod;
     font-size: 1.5em;
@@ -141,7 +162,16 @@
   .feature p {
     color: #555;
   }
-
+  @media (max-width: 480px) {
+    .feature {
+      flex: 1 1 100%; /* Full-width on very small screens */
+    }
+  }
+  @media (max-width: 768px) {
+    .feature {
+      flex: 1 1 calc(50% - 20px); /* Adjust for smaller screens */
+    }
+  }
   /* Map Section */
   .map-section {
     padding: 30px;
@@ -490,8 +520,8 @@ button:hover {
       <li class="dropdown">
         <a href="#services" class="dropbtn">Services</a>
         <div class="dropdown-content" id="services-menu">
-          <a href="#fuel-stations">Fuel Stations</a>
-          <a href="#electric-stations">Electric Charging Stations</a>
+          <a href="#" onclick="selectService('fuel')">Fuel Stations</a>
+      <a href="#" onclick="selectService('electric')">EV Charging Stations</a>
         
         </div>
       </li>
@@ -621,6 +651,13 @@ button:hover {
     <input type="text" id="locationName" placeholder="Enter location name (e.g., Nairobi)" />
 <button onclick="loadStationsByLocation()">Find Stations</button>
 <button id="startDirectionButton">Start Direction</button>
+<div>
+  <h3>Select a Station</h3>
+  <select id="stationsDropdown">
+    <option value="" disabled selected>Select a station</option>
+  </select>
+  <button id="startDirections">Start Directions</button>
+</div>
 
     <div id="map"></div>
     <div id="results"></div> 
@@ -705,7 +742,6 @@ button:hover {
       aboutSection.style.display = 'none';
     }
   }
-
   // Attach the toggleAbout function to all "About Us" links
   document.querySelectorAll('a[href="#aboutSection"]').forEach(link => {
     link.addEventListener('click', function (e) {
@@ -728,6 +764,23 @@ function toggleLoginRegister(service) {
   document.getElementById("aboutSection").scrollIntoView({ behavior: "smooth" });
 });
 
+function selectService(serviceType) {
+  // Save the selected service type to local storage
+  localStorage.setItem("selectedService", serviceType);
+  alert(`You selected ${serviceType} stations. Please log in to view.`);
+}
+async function fetchStations(serviceType) {
+    console.log("Fetching stations for service:", serviceType);
+    try {
+        const response = await fetch(`/stations?serviceType=${serviceType}`);
+        const data = await response.json();
+        console.log("Stations data:", data);
+        // Render stations on the map or UI
+    } catch (error) {
+        console.error("Error fetching stations:", error);
+        alert("Unable to fetch stations. Please try again.");
+    }
+}
 
 
   document.querySelectorAll("#services-menu a").forEach(link => {
@@ -772,6 +825,48 @@ function toggleLoginRegister(service) {
   });
 
 
+  document.addEventListener("DOMContentLoaded", () => {
+  const registrationForm = document.querySelector("#register-modal form");
+
+  if (registrationForm) {
+    registrationForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(registrationForm);
+      const formObject = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch("/driver/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formObject),
+        });
+
+        let result;
+        try {
+          // Try parsing JSON response
+          result = await response.json();
+        } catch (error) {
+          console.error("Non-JSON response received:", await response.text());
+          throw new Error("Unexpected response format from the server.");
+        }
+
+        if (response.ok && result.success) {
+          alert(result.message);
+          document.getElementById("register-modal").style.display = "none";
+        } else {
+          console.error("Server error:", result);
+          alert(`Error: ${result.message || "Unexpected error occurred."}`);
+        }
+      } catch (error) {
+        console.error("Unexpected client-side error:", error);
+        alert("Unexpected error occurred. Please try again.");
+      }
+    });
+  }
+});
+
+
 
 
 
@@ -805,6 +900,13 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
     const result = await response.json();
     if (result.success) {
       alert('Login successful!');
+       // Retrieve the selected service from local storage
+       const selectedService = localStorage.getItem("selectedService") || "fuel";
+
+// Fetch and display the corresponding stations
+fetchStations(selectedService);
+   // Show the stations section
+      document.getElementById("stations-section").style.display = "block";
       document.getElementById('login-section').style.display = 'none';
       document.getElementById('map-section').style.display = 'block';
       document.getElementById("homeSection").style.display = "none";
@@ -935,9 +1037,30 @@ async function loadStations() {
       },
       body: JSON.stringify(formObject), // Send JSON stringified body
     });
-
+// Try to parse JSON response
+let result;
+        try {
+            result = await response.json();
+          } catch (e) {
+            console.error("Response is not valid JSON:", await response.text());
+            alert("Unexpected server response. Please try again later.");
+            return;
+        }
     if (response.ok) {
       alert('Login successful!');
+
+
+       // Validate selectedService
+       const selectedService = localStorage.getItem("selectedService");
+       console.log("Selected Service:", localStorage.getItem("selectedService"));
+
+       if (!selectedService) {
+                alert("No service selected. Defaulting to Fuel Stations.");
+                localStorage.setItem("selectedService", "fuel"); // Default to fuel
+            }
+            
+            // Fetch stations for the selected service
+            fetchStations(localStorage.getItem("selectedService"));
        // Hide navigation bar and welcome sections
       document.getElementById('navigationBar').style.display = 'none';
       document.querySelector('.welcome-section').style.display = 'none';
@@ -1012,9 +1135,11 @@ function pinUserLocation(latitude, longitude) {
 }
 
 
-async function fetchNearbyStations(latitude, longitude) {
-  console.log('Fetching stations for:', latitude, longitude);
+async function fetchNearbyStations(latitude, longitude,serviceType) {
+  const stationType = document.getElementById('stationType').value; // Dropdown value
+    console.log('Fetching stations for:', latitude, longitude, stationType);
   try {
+    const selectedService = localStorage.getItem('selectedService');
     const stationType = document.getElementById('stationType').value;
     const radius = 50; // Fixed radius of 50 km
     const response = await fetch(`/driver/nearby-stations?latitude=${latitude}&longitude=${longitude}&station_type=${stationType}&radius=${radius}`, {
@@ -1402,6 +1527,57 @@ function startRouting(userLat, userLng, stationLat, stationLng) {
     routeWhileDragging: true,
   }).addTo(map);
 }
+
+// Define coordinates for fuel and EV charging stations
+const stations = [
+  { id: 1, name: "Fuel Station A", type: "fuel", latitude: -1.286389, longitude: 36.817223 },
+  { id: 2, name: "Fuel Station B", type: "fuel", latitude: -1.2921, longitude: 36.8219 },
+  { id: 3, name: "EV Charging Station A", type: "electric", latitude: -1.295, longitude: 36.804 },
+];
+
+// Function to populate stations in a dropdown
+function populateStationsDropdown() {
+  const dropdown = document.getElementById("stationsDropdown");
+  stations.forEach((station) => {
+    const option = document.createElement("option");
+    option.value = `${station.latitude},${station.longitude}`;
+    option.textContent = `${station.name} (${station.type})`;
+    dropdown.appendChild(option);
+  });
+}
+
+// Initialize the dropdown
+document.addEventListener("DOMContentLoaded", populateStationsDropdown);
+
+// Handle "Start Directions" button
+document.getElementById("startDirections").addEventListener("click", () => {
+  const selectedStation = document.getElementById("stationsDropdown").value;
+  if (!selectedStation) {
+    alert("Please select a station to start directions.");
+    return;
+  }
+
+  // Extract user's live location
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const userLatitude = position.coords.latitude;
+        const userLongitude = position.coords.longitude;
+
+        // Launch Google Maps with the user's location as the starting point
+        const [destinationLatitude, destinationLongitude] = selectedStation.split(",");
+        const googleMapsURL = `https://www.google.com/maps/dir/${userLatitude},${userLongitude}/${destinationLatitude},${destinationLongitude}`;
+        window.open(googleMapsURL, "_blank");
+      },
+      (error) => {
+        alert("Error fetching your location. Please enable location services.");
+        console.error("Geolocation error:", error);
+      }
+    );
+  } else {
+    alert("Geolocation is not supported by your browser.");
+  }
+});
 
 
   </script>

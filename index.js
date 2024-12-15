@@ -7,7 +7,6 @@ const pool = require("./config/db");
 const nodemailer = require('nodemailer');
 
 const driverRoutes = require("./routes/driverRoutes");
-
 const app = express();
 
 const bodyParser = require("body-parser");
@@ -44,12 +43,29 @@ app.use(
 
 // Use routes
 app.use("/driver", driverRoutes);
+
+
 app.use(express.static('public'));
 app.use(express.static(path.join(__dirname, 'public')));
 // Serve HTML for the root route
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
+
+app.get('/stations', (req, res) => {
+  const { serviceType } = req.query;
+  if (!serviceType) {
+      return res.status(400).json({ success: false, message: "Missing service type." });
+  }
+  // Dummy data for testing
+  const stations = [
+      { id: 1, name: "Station 1", type: "fuel" },
+      { id: 2, name: "Station 2", type: "electric" },
+  ];
+  res.json({ success: true, stations });
+});
+
+
 app.get('/terms-and-conditions', (req, res) => {
   res.sendFile(__dirname + '/terms-and-conditions.html');
 });

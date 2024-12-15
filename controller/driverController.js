@@ -5,75 +5,41 @@ const { createPool } = require("mysql2");
 
 // Register Driver
 exports.registerDriver = async (req, res) => {
+  const {
+    first_name, last_name, email, phone,
+    license_number, vehicle_type, vehicle_registration, password,
+  } = req.body;
 
-  if (req.session.driverId) {
-    exports.registerDriver = async (req, res) => {
-      const { first_name, last_name, email, phone, license_number, vehicle_type, vehicle_registration, password } = req.body;
-    
-      console.log("Incoming registration request body:", req.body);
-
-    
-      try {
-        console.log("Password received for hashing:", password);
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-    
-        const query = `
-          INSERT INTO driver 
-          (first_name, last_name, email, phone, license_number, vehicle_type, vehicle_registration, password) 
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-    
-        console.log("Executing Query:", query);
-console.log("Query Values:", [
-  first_name,
-  last_name,
-  email,
-  phone,
-  license_number,
-  vehicle_type || null,
-  vehicle_registration || null,
-  hashedPassword,
-]);
-    
-        await pool.query(query, [
-          first_name,
-          last_name,
-          email,
-          phone,
-          license_number,
-          vehicle_type || null,
-          vehicle_registration || null,
-          hashedPassword,
-        ]);
-    
-        console.log("Driver registered successfully:", { first_name, last_name, email });
-        res.status(200).send("Registration successful!");
-      } catch (err) {
-        console.error("Error registering driver:", err);
-        res.status(500).send("An error occurred while registering the driver.");
-      }
-    };
-    
-
-    return res.redirect("/"); // Redirect to the homepage if already logged in
+  if (!first_name || !last_name || !email || !phone || !license_number || !password) {
+    return res.status(400).json({ success: false, message: "All fields are required." });
   }
-  const { first_name, last_name, email, phone, license_number, vehicle_type, vehicle_registration, password } = req.body;
+
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const query = `
-      INSERT INTO driver 
-      (first_name, last_name, email, phone, license_number, vehicle_type, vehicle_registration, password) 
+      INSERT INTO driver
+      (first_name, last_name, email, phone, license_number, vehicle_type, vehicle_registration, password)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    await pool.query(query, [first_name, last_name, email, phone, license_number, vehicle_type, vehicle_registration, hashedPassword]);
+
+    await pool.query(query, [
+      first_name, last_name, email, phone,
+      license_number, vehicle_type || null,
+      vehicle_registration || null, hashedPassword,
+    ]);
+
     console.log("Driver registered successfully:", { first_name, last_name, email });
-    res.redirect("/");
+    res.status(200).json({ success: true, message: "Registration successful!Please Login" });
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Error registering driver");
+    if (err.code === "ER_DUP_ENTRY") {
+      console.error("Duplicate entry error:", err);
+      return res.status(400).json({ success: false, message: "Email or license number already exists." });
+    }
+    console.error("Error during registration:", err);
+    res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
+
 // Driver Login
 exports.loginDriver = async (req, res) => {
     console.log("Request Body:", req.body);
