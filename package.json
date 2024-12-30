@@ -16,6 +16,7 @@
     "express-mysql-session": "^3.0.3",
     "mysql2": "^3.11.4",
     "nodemailer": "^6.9.16",
+    "redis": "^4.7.0",
     "session": "^0.1.0",
     "twilio": "^5.3.6"
   },

@@ -1,7 +1,8 @@
 const bcrypt = require("bcryptjs");
 const pool = require("../config/db");
 const { createPool } = require("mysql2");
-
+const redis = require("redis");
+const redisClient = redis.createClient();
 
 // Register Driver
 exports.registerDriver = async (req, res) => {
@@ -48,7 +49,9 @@ exports.loginDriver = async (req, res) => {
   
     // Log the email and password to ensure they are received correctly
     console.log("Login attempt with email:", email, "and password:", password);
-  
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "Email and password are required." });
+    }
     try {
       // Query the database for a driver with the given email
       const [result] = await pool.query('SELECT * FROM driver WHERE email = ?', [email]);
@@ -76,18 +79,29 @@ exports.loginDriver = async (req, res) => {
         console.log("Password mismatch for email:", email);
         return res.status(401).send('Invalid email or password.');
       }
-  
+   // Regenerate session and store user data
+   req.session.regenerate((err) => {
+    if (err) {
+      console.error("Session regeneration error:", err);
+      return res.status(500).send("Session error.");
+    }
       // Store the driver ID in the session
       req.session.driverId = user.id;
       console.log("Login successful for driver ID:", user.id);
   
       // Send a success response
       res.status(200).json({ success: true, message: 'Login successful!' });
+  });
     } catch (error) {
       console.error('Error logging in driver:', error);
       res.status(500).send('Error logging in driver.');
     }
   };
+  const crypto = require("crypto");
+const nodemailer = require("nodemailer");
+
+
+
   // Fetch stations handler
   exports.getStations = async (req, res) => {
     console.log("Session data:", req.session);
@@ -99,7 +113,11 @@ exports.loginDriver = async (req, res) => {
     }
   
     const { type } = req.query;
-  
+  // Validate the type parameter
+  const allowedTypes = ['electric', 'fuel'];
+    if (!allowedTypes.includes(type)) {
+        return res.status(400).json({ success: false, message: "Invalid station type." });
+    }
     try {
       const tableName = type === 'electric' ? 'electric' : 'fuel';
       const [stations] = await pool.query(`SELECT * FROM ${tableName}`);
@@ -114,14 +132,24 @@ exports.loginDriver = async (req, res) => {
   exports.getNearbyStations = async (req, res) => {
     const { latitude, longitude, station_type, radius = 50 } = req.query;
      console.log('Nearby stations request:', { latitude, longitude, station_type, radius });
+     
      if (!req.session.driverId) {
       return res.status(401).json({ success: false, message: 'Unauthorized. Please log in.' });
     }  
+     // Validate the station_type parameter
+     const allowedTypes = ['electric', 'fuel'];
+     if (!allowedTypes.includes(station_type)) {
+         return res.status(400).json({ success: false, message: "Invalid station type." });
+     }
+     if (!["electric", "fuel"].includes(station_type)) {
+      console.log("Invalid station_type received:", station_type);
+      return res.status(400).json({ success: false, message: "Invalid station type." });
+    }
     try {
       const tableName = station_type === 'electric' ? 'electric' : 'fuel';
       console.log('Station type received:', station_type);
       const query = `
-        SELECT *, 
+        SELECT station_name, location, latitude, longitude,
           (6371 * ACOS(
             COS(RADIANS(?)) * COS(RADIANS(latitude)) *
             COS(RADIANS(longitude) - RADIANS(?)) +

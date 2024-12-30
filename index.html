@@ -77,7 +77,7 @@
     position: absolute;
     top: 100%;
     left: 0;
-    background-color: #333;
+    background-color: brown;
     min-width: 150px;
     z-index: 1;
   }
@@ -325,6 +325,10 @@ footer p {
   margin: 20px auto;
   justify-content: left;
   max-width: 100%;
+  background: #fff;
+  padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1)
 }
 
 .card {
@@ -506,7 +510,24 @@ button:hover {
     padding: 20px;
     text-align: center;
   }
-  
+  body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+       background-color: bisque;
+        }
+        header {
+          background-color: #333;
+          color: #fff;
+          padding: 10px 20px;
+          text-align: center;
+        }
+        h1, h2 {
+          color: #333;
+        }
+        #dashboard {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -519,10 +540,9 @@ button:hover {
       <li><a href="#about" onclick="toggleAbout()">About Us</a></li>
       <li class="dropdown">
         <a href="#services" class="dropbtn">Services</a>
-        <div class="dropdown-content" id="services-menu">
-          <a href="#" onclick="selectService('fuel')">Fuel Stations</a>
-      <a href="#" onclick="selectService('electric')">EV Charging Stations</a>
-        
+        <div class="dropdown-content" id="services-menu" s>
+          <a href="#driverPortal" onclick="navigateToPortal('driver')">Driver Portal</a>
+          <a href="#adminPortal" onclick="navigateToPortal('admin')">Admin Portal</a>
         </div>
       </li>
             <li><a href="#contact" onclick="toggleContact()">Contact-Us</a></li>
@@ -532,7 +552,20 @@ button:hover {
   <header>
     <h1>Welcome to Smart Rides</h1>
   </header>
-
+  <div id="driverPortal" style="display:none;">
+    <h2>Driver Portal</h2>
+    <select id="stationType">
+      <option value="fuel">Fuel Stations</option>
+      <option value="electric">EV Stations</option>
+    </select>
+    
+    
+  </div>
+  <div id="adminPortal" style="display:none;">
+    <h2>Admin Portal</h2>
+    <p>Manage stations.</p>
+  </div>
+  
   <div id="login-section" style="display:none;">
     <form id="loginForm">
       <input type="email" name="email" placeholder="Email" required />
@@ -543,7 +576,7 @@ button:hover {
   </div>
 
   <div id="register-modal" class="modal">
-    <div class="modal-content">
+<div class="modal-content">
       <span class="close" onclick="closeModal('register-modal')">&times;</span>
       <h2>Driver Registration</h2>
       <form action="/driver/register" method="POST">
@@ -560,6 +593,131 @@ button:hover {
       <p>Already have an account? <a href="#" onclick="switchToLogin()">Login here</a></p>
     </div>
   </div>
+  <div id="admin-login-section" style="display:none;">
+    <form id="adminLoginForm" style="display:none;">
+      <input type="emai+l" name="email" placeholder="Email" required />
+      <input type="password" name="password" placeholder="Password" required />
+      <button type="submit" onclick="showAdminLogin()">Login</button>
+    </form>
+    <p>New admin? <a href="#" onclick="switchToAdminRegister()">Register here</a></p>
+  </div>
+
+  <div id="admin-register-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('admin-register-modal')">&times;</span>
+      <h2>Admin Registration</h2>
+      <form id="adminRegisterForm">
+        <input type="text" name="first_name" placeholder="First Name" required />
+        <input type="text" name="last_name" placeholder="Last Name" required />
+        <input type="email" name="email" placeholder="Email" required />
+        <input type="text" name="phone" placeholder="Phone" required />
+        <input type="password" name="password" placeholder="Password" required />
+        <button type="submit">Register</button>
+      </form>
+    </div>
+
+  </div>
+  <div class="container" id="dashboard" style="display: none;">
+        
+        
+    <form id="fuelStationForm" style="display: none;">
+      <h2>Add Fuel Station</h2>
+      <input type="text" name="station_name" placeholder="Station Name" required>
+      <input type="text" name="location" placeholder="Location" required>
+      <input type="number" name="latitude" placeholder="Latitude" step="0.00000001" required>
+      <input type="number" name="longitude" placeholder="Longitude" step="0.00000001" required>
+      <input type="text" name="services" placeholder="Services (comma-separated)" />
+      <input type="text" name="fuel_types" placeholder="Fuel Types (comma-separated)" />
+      <input type="text" name="contact_number" placeholder="Contact Number" required />
+      <input type="text" name="opening_hours" placeholder="Opening Hours" required />
+      <input type="text" name="amenities" placeholder="Amenities (comma-separated)" required />
+      <input type="text" name="station_manager" placeholder="Station Manager" />
+      <input type="url" name="website" placeholder="Website" />
+      <input type="number" name="rating" placeholder="Rating (e.g., 4.5)" step="0.01" />
+      <Label>Last Inspection Date:</Label>
+      <input type="date" name="last_inspection_date" placeholder="Last Inspection Date" />
+      <button type="submit">Add Fuel Station</button>
+    </form>
+   
+    <form id="electricStationForm" style="display: none;">
+      <h2>Add EV Charging Station</h2>
+      <input type="text" name="station_name" placeholder="Station Name" required>
+      <input type="text" name="location" placeholder="Location" required>
+      <input type="number" name="latitude" placeholder="Latitude" step="0.00000001" required>
+      <input type="number" name="longitude" placeholder="Longitude" step="0.00000001" required>
+      <input type="text" name="services" placeholder="Services (comma-separated)" />
+      <input type="text" name="fuel_types" placeholder="Fuel Types (comma-separated)" />
+      <input type="text" name="contact_number" placeholder="Contact Number" required />
+      <input type="text" name="opening_hours" placeholder="Opening Hours" required />
+      <input type="text" name="amenities" placeholder="Amenities (comma-separated)" required />
+      <input type="text" name="station_manager" placeholder="Station Manager" />
+      <input type="url" name="website" placeholder="Website starting with transfer protocal e.g https:" />
+      <input type="number" name="rating" placeholder="Rating (e.g., 4.5 out of 5)" step="0.01" />
+      <label for="Date">Last Inspection Date:</label>
+      <input type="date" name="last_inspection_date" placeholder="Last Inspection Date" />
+      <button type="submit">Add EV Charging Station</button>
+    </form>
+    <div>
+      <button id="fuelButton">Add Fuel Station</button>
+    <button id="evButton">Add EV Charging Station</button>
+        <button onclick="showForm('updateStation')">Update Station</button>
+        <button onclick="showForm('deleteStation')">Delete Station</button>
+                <button id="logoutButton" style="display: none;">Logout</button>
+
+    </div>
+
+     
+    </div>
+    <!-- Update Station Form -->
+<div id="updateStationForm" style="display:none;">
+<form id="updateStation">
+
+    <label for="stationType">Station Type:</label>
+    <select name="station_type" id="stationType"  required>
+        <option value="fuel">Fuel</option>
+        <option value="electric">Electric</option>
+    </select>
+    <input type="number" name="station_id" id="stationId" placeholder="Station ID" required/>
+    <input type="text" name="station_name" placeholder="Station Name" />
+    <input type="text" name="location" placeholder="Location" />
+    <input type="number" name="latitude" placeholder="Latitude" step="0.00000001" />
+    <input type="number" name="longitude" placeholder="Longitude" step="0.00000001" />
+    <input type="text" name="services" placeholder="Services (comma-separated)" />
+    <input type="text" name="fuel_types" placeholder="Fuel Types (comma-separated)" />
+    <input type="text" name="contact_number" placeholder="Contact Number" required />
+    <input type="text" name="opening_hours" placeholder="Opening Hours" required />
+    <input type="text" name="amenities" placeholder="Amenities (comma-separated)" required />
+    <input type="text" name="station_manager" placeholder="Station Manager" />
+    <input type="url" name="website" placeholder="Website" />
+    <input type="number" name="rating" placeholder="Rating (e.g., 4.5)" step="0.01" />
+  <Label>Last Inspection Date:</Label>
+    <input type="date" name="last_inspection_date" placeholder="Last Inspection Date" />
+    <button type="submit">Update Station</button>
+</form>
+</div>
+
+<!-- Delete Station Form -->
+<div id="deleteStationForm" style="display:none;">
+<form id="deleteStation">
+    <label for="stationType">Station Type:</label>
+    <select name="station_type" required>
+        <option value="fuel">Fuel</option>
+        <option value="electric">Electric</option>
+    </select>
+    <input type="number" name="station_id" placeholder="Station ID" required />
+    <button type="submit">Delete Station</button>
+</form>
+<button id="logoutButton" style="display: none;">Logout</button>
+
+<div id="loadingIndicator" style="display:none; text-align:center; margin-top:20px;">
+<p>Loading...</p>
+</div>
+
+</div>
+
+
+  </div>
+
    <!-- Welcome Section -->
    <section class="welcome-section"  id="welcomeSection">
     <h2>Your Guide to Fueling and Charging Stations in Kenya</h2>
@@ -643,11 +801,7 @@ button:hover {
   <div id="map-section" style="display: none;">
     <button onclick="manuallyEnterLocation()">Manually Enter Location</button>
     <button id="fetchNearbyStationsButton">Fetch Nearby Stations</button>
-    <select id="stationType">
-      <option value="fuel">Fuel Stations</option>
-      <option value="electric">EV Stations</option>
-    </select>
-    <button id="loadStationsButton">Load Stations</button>
+    
     <input type="text" id="locationName" placeholder="Enter location name (e.g., Nairobi)" />
 <button onclick="loadStationsByLocation()">Find Stations</button>
 <button id="startDirectionButton">Start Direction</button>
@@ -731,6 +885,23 @@ button:hover {
   }
 });
 
+
+function navigateToPortal(portalType) {
+  document.querySelectorAll("section,#login-section, #admin-login-section,#dashboard").forEach((element) => {
+    element.style.display = "none";
+  });
+  
+   if (portalType === "driver") {
+        document.getElementById("driverPortal").style.display = "block"; 
+        document.getElementById("login-section").style.display = "block"; 
+    } else if (portalType === "admin") {
+        document.getElementById("adminPortal").style.display = "block"; 
+        document.getElementById("admin-login-section").style.display = "block"; 
+        document.getElementById("adminLoginForm").style.display = "block";
+        document.getElementById("dashboard").style.display = "none"; 
+    }
+}
+
   //about us section
   function toggleAbout() {
     const aboutSection = document.getElementById('aboutSection');
@@ -780,6 +951,14 @@ async function fetchStations(serviceType) {
         console.error("Error fetching stations:", error);
         alert("Unable to fetch stations. Please try again.");
     }
+}
+function showAdminLogin() {
+  // Hide the driver login section
+  document.getElementById('login-section').style.display = 'none';
+
+  // Show only the admin login section
+  document.getElementById('admin-login-section').style.display = 'block';
+  document.getElementById('adminLoginForm').style.display = 'block';
 }
 
 
@@ -890,7 +1069,14 @@ async function fetchStations(serviceType) {
 document.getElementById('loginForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   const formData = new FormData(event.target);
-
+  if (!email || !password) {
+    alert("Email and Password are required.");
+    event.preventDefault(); // Prevent form submission
+  }
+  if (!/\S+@\S+\.\S+/.test(email)) {
+    alert("Invalid email format.");
+    event.preventDefault();
+  }
   try {
     const response = await fetch('/driver/login', {
       method: 'POST',
@@ -901,7 +1087,8 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
     if (result.success) {
       alert('Login successful!');
        // Retrieve the selected service from local storage
-       const selectedService = localStorage.getItem("selectedService") || "fuel";
+       const selectedService = localStorage.getItem("selectedService");
+       console.log("Selected Service:", localStorage.getItem("selectedService"));
 
 // Fetch and display the corresponding stations
 fetchStations(selectedService);
@@ -984,7 +1171,7 @@ async function loadStations() {
     return;
   }
   
-  const stationType = document.getElementById('stationType').value;
+  const stationType = document.getElementById('stationType').value || localStorage.getItem("selectedService") || "fuel";
   console.log('Station type selected:', stationType);
 
   // Get the driver's live location
@@ -1134,11 +1321,32 @@ function pinUserLocation(latitude, longitude) {
   }
 }
 
-
+document.addEventListener('DOMContentLoaded', () => {
+    const stationTypeDropdown = document.getElementById('stationType');
+    const storedServiceType = localStorage.getItem("selectedService");
+    if (storedServiceType) {
+        stationTypeDropdown.value = storedServiceType;
+        console.log("Dropdown synchronized with localStorage:", storedServiceType);
+    }
+});
 async function fetchNearbyStations(latitude, longitude,serviceType) {
-  const stationType = document.getElementById('stationType').value; // Dropdown value
+  const stationTypeDropdownValue = document.getElementById('stationType').value;
+const stationType = stationTypeDropdownValue && stationTypeDropdownValue !== "Driver Portal" 
+  ? stationTypeDropdownValue 
+  : (localStorage.getItem("selectedService") || "fuel");
+
+console.log("Station type selected for fetch:", stationType);
     console.log('Fetching stations for:', latitude, longitude, stationType);
-  try {
+    console.log("Dropdown value:", document.getElementById('stationType').value);
+console.log("Selected service in localStorage:", localStorage.getItem("selectedService"));
+console.log("Final stationType used:", stationType);
+    // Validate stationType
+    if (!["electric", "fuel"].includes(stationType)) {
+        alert("Invalid station type selected. Defaulting to fuel.");
+        localStorage.setItem("selectedService", "fuel");
+        stationType = "fuel"; // Default to fuel
+    }
+    try {
     const selectedService = localStorage.getItem('selectedService');
     const stationType = document.getElementById('stationType').value;
     const radius = 50; // Fixed radius of 50 km
@@ -1223,7 +1431,10 @@ async function fetchNearbyStations(latitude, longitude,serviceType) {
     console.error('Error fetching nearby stations:', error);
   }
 }
-
+document.getElementById('stationType').addEventListener('change', (event) => {
+    localStorage.setItem("selectedService", event.target.value);
+    console.log("Updated service type in localStorage:", event.target.value);
+});
 function manuallyEnterLocation() {
   const latitude = parseFloat(prompt('Enter Latitude:'));
   const longitude = parseFloat(prompt('Enter Longitude:'));
@@ -1254,6 +1465,10 @@ function manuallyEnterLocation() {
   // Fetch nearby stations
   fetchNearbyStations(latitude, longitude);
 }
+document.getElementById('stationType').addEventListener('change', (event) => {
+  localStorage.setItem("selectedService", event.target.value);
+  console.log("Updated selectedService in localStorage:", event.target.value);
+});
 
 document.getElementById('fetchNearbyStationsButton').addEventListener('click', () => {
   if (!map) {
@@ -1579,6 +1794,342 @@ document.getElementById("startDirections").addEventListener("click", () => {
   }
 });
 
+
+function showDashboard() {
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('admin-login-section').style.display = 'none';
+}
+ 
+        function resetForm(formId) {
+  const form = document.getElementById(formId);
+  if (form) {
+    form.reset();
+  }
+}
+function debounce(func, delay) {
+    let timer;
+    return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+const debouncedCheckAndFetchStationDetails = debounce(checkAndFetchStationDetails, 300);
+document.getElementById("stationId").addEventListener("input", debouncedCheckAndFetchStationDetails);
+document.getElementById("stationType").addEventListener("change", debouncedCheckAndFetchStationDetails);
+
+
+        function toggleLoading(show) {
+  const loadingIndicator = document.getElementById("loadingIndicator");
+  loadingIndicator.style.display = show ? "block" : "none";
+}
+
+        function showForm(formId) {
+        document.querySelectorAll('#dashboard div').forEach(div => div.style.display = 'none');
+        document.getElementById(formId + 'Form').style.display = 'block';
+    }
+        function switchToAdminRegister() {
+          document.getElementById("admin-login-section").style.display = "none";
+          document.getElementById("admin-register-modal").style.display = "block";
+        }
+        function toggleForm(formToShow) {
+    document.getElementById('fuelStationForm').style.display = formToShow === 'fuel' ? 'block' : 'none';
+    document.getElementById('electricStationForm').style.display = formToShow === 'electric' ? 'block' : 'none';
+}
+
+document.getElementById('fuelButton').addEventListener('click', () => toggleForm('fuel'));
+document.getElementById('evButton').addEventListener('click', () => toggleForm('electric'));
+
+        function closeModal(modalId) {
+          document.getElementById(modalId).style.display = "none";
+          document.getElementById("admin-login-section").style.display = "block";
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+  const loginContainer = document.getElementById('loginFormContainer');
+  const dashboardContainer = document.getElementById('dashboard');
+  const fuelStationForm = document.getElementById('fuelStationForm');
+    const electricStationForm = document.getElementById('electricStationForm');
+
+    
+    fuelStationForm.style.display = 'none';
+    electricStationForm.style.display = 'none'; 
+     
+       // Event listener for showing the Fuel Station form
+       document.getElementById('fuelButton').addEventListener('click', () => {
+        fuelStationForm.style.display = 'block'; // Show the Fuel form
+        electricStationForm.style.display = 'none'; // Hide the EV form
+    });
+    document.getElementById('evButton').addEventListener('click', () => {
+    electricStationForm.style.display = 'block';
+    fuelStationForm.style.display = 'none';
+});
+        document.getElementById("adminLoginForm").addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const formData = new FormData(event.target);
+      
+          try {
+            const response = await fetch("/admin/login", {
+              method: "POST",
+              body: JSON.stringify(Object.fromEntries(formData)),
+              headers: { "Content-Type": "application/json" },
+            });
+      
+            const result = await response.json();
+            if (result.success) {
+              if (loginContainer) loginContainer.style.display = 'none';
+              if (dashboardContainer) dashboardContainer.style.display = 'block';
+              document.getElementById('admin-login-section').style.display = 'none'; // Hide login
+              document.getElementById("dashboard").style.display = "block";// Show dashboard
+                document.getElementById('logoutButton').style.display = 'block';
+              alert(result.message || "Login failed.");
+            }
+          } catch (error) {
+            console.error("Login error:", error);
+          }
+        }); 
+        });
+        document.addEventListener('DOMContentLoaded', async () => {
+  const loginContainer = document.getElementById('loginFormContainer');
+  const dashboardContainer = document.getElementById('dashboard');
+
+  try {
+    const response = await fetch('/admin/check-session'); // API to check if the admin is logged in
+    const result = await response.json();
+
+    const loginSection = document.getElementById('admin-login-section');
+        const dashboard = document.getElementById('dashboard');
+        const logoutButton = document.getElementById('logoutButton');
+    if (result.loggedIn) {
+      document.getElementById('dashboard').style.display = 'block';
+      document.getElementById('logoutButton').style.display = 'block';
+      loginContainer.style.display = 'none';
+      dashboardContainer.style.display = 'block';
+      loginSection.style.display = 'none';
+            dashboard.style.display = 'block';
+            logoutButton.style.display = 'block';
+    } else {
+      loginContainer.style.display = 'block';
+      dashboardContainer.style.display = 'none';
+      loginSection.style.display = 'block';
+            dashboard.style.display = 'none';
+            logoutButton.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Error checking session:', error);
+  }
+});
+
+        document.getElementById("adminRegisterForm").addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const formData = new FormData(event.target);
+      
+          try {
+            const response = await fetch("/admin/register", {
+              method: "POST",
+              body: JSON.stringify(Object.fromEntries(formData)),
+              headers: { "Content-Type": "application/json" },
+            });
+      
+            const result = await response.json();
+            if (result.success) {
+              alert("Registration successful!");
+              closeModal("admin-register-modal");
+            } else {
+              alert(result.message || "Registration failed.");
+            }
+          } catch (error) {
+            console.error("Registration error:", error);
+          }
+        });
+
+
+        async function handleFormSubmit(event, stationType) {
+      event.preventDefault();
+      const form = event.target;
+      const formData = new FormData(form);
+      formData.append('station_type', stationType);
+
+      try {
+        const response = await fetch('/admin/add-station', {
+          method: 'POST',
+          body: JSON.stringify(Object.fromEntries(formData)),
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          alert(`${stationType === 'fuel' ? 'Fuel Station' : 'EV Charging Station'} added successfully!`);
+          form.reset();
+          document.getElementById('dashboard').style.display = 'block'; // Show dashboard
+        } else {
+          alert(result.message || 'Error adding station.');
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        alert('Unexpected error occurred.');
+      }
+    }
+    document.getElementById('logoutButton').addEventListener('click', async () => {
+  try {
+    const response = await fetch('/admin/logout', { method: 'GET' });
+    if (response.ok) {
+      alert('Logged out successfully!');
+      location.reload(); // Reload the page to reset the view
+    }
+  } catch (error) {
+    console.error('Error logging out:', error);
+  }
+});
+
+
+    document.getElementById('fuelStationForm').addEventListener('submit', (event) => {
+      handleFormSubmit(event, 'fuel');
+    });
+
+    document.getElementById('electricStationForm').addEventListener('submit', (event) => {
+      handleFormSubmit(event, 'electric');
+    });
+    <!-- Script to fetch station details for update -->
+
+  document.getElementById("updateStation").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const station_id = formData.get("station_id");
+    const station_type = formData.get("station_type");
+
+    try {
+      const response = await fetch(`/admin/get-station?station_id=${station_id}&station_type=${station_type}`);
+      const result = await response.json();
+
+      if (result.success) {
+        // Populate form fields with fetched data
+        const station = result.station;
+        event.target.station_name.value = station.station_name || "";
+        event.target.location.value = station.location || "";
+        event.target.latitude.value = station.latitude || "";
+        event.target.longitude.value = station.longitude || "";
+        event.target.services.value = station.services || "";
+event.target.fuel_types.value = station.fuel_types || "";
+event.target.contact_number.value = station.contact_number || "";
+event.target.opening_hours.value = station.opening_hours || "";
+event.target.amenities.value = station.amenities || "";
+event.target.station_manager.value = station.station_manager || "";
+event.target.website.value = station.website || "";
+event.target.rating.value = station.rating || "";
+event.target.last_inspection_date.value = station.last_inspection_date ||
+        alert("Station details fetched. Update the fields and submit.");
+      } else {
+        alert(result.message || "Error fetching station details.");
+      }
+    } catch (error) {
+      console.error("Error fetching station details:", error);
+    }
+  });
+
+  // Add event listeners for real-time validation and fetching
+document.getElementById("stationId").addEventListener("input", checkAndFetchStationDetails);
+document.getElementById("stationType").addEventListener("change", checkAndFetchStationDetails);
+
+// Function to fetch station details when both inputs are valid
+async function checkAndFetchStationDetails() {
+  const stationIdElement = document.getElementById("stationId");
+  const stationTypeElement = document.getElementById("stationType");
+
+  const stationId = stationIdElement.value;
+  const stationType = stationTypeElement.value;
+
+  // Ensure both fields are filled
+  if (!stationId || !stationType) {
+    return; // Exit if either field is empty
+  }
+
+  try {
+    toggleLoading(true); // Show loading indicator
+
+    const response = await fetch(`/admin/get-station?station_id=${stationId}&station_type=${stationType}`);
+    const result = await response.json();
+
+    toggleLoading(false); // Hide loading indicator
+
+    if (result.success) {
+      const station = result.station;
+      const form = document.getElementById("updateStation");
+
+      // Prefill the form with fetched data
+      form.station_name.value = station.station_name || "";
+      form.location.value = station.location || "";
+      form.latitude.value = station.latitude || "";
+      form.longitude.value = station.longitude || "";
+      form.services.value = station.services || "";
+      form.fuel_types.value = station.fuel_types || "";
+      form.contact_number.value = station.contact_number || "";
+      form.opening_hours.value = station.opening_hours || "";
+      form.amenities.value = station.amenities || "";
+      form.station_manager.value = station.station_manager || "";
+      form.website.value = station.website || "";
+      form.rating.value = station.rating || "";
+      form.last_inspection_date.value = station.last_inspection_date || "";
+      alert("Station details loaded successfully.");
+    } else {
+      alert(result.message || "Station not found.");
+    }
+  } catch (error) {
+    toggleLoading(false); // Ensure loading indicator hides
+    console.error("Error fetching station details:", error);
+    alert("Unexpected error occurred while fetching station details.");
+  }
+}
+
+
+  document.getElementById("updateStation").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+
+  try {
+    const response = await fetch("/admin/update-station", {
+      method: "PUT",
+      body: JSON.stringify(Object.fromEntries(formData)),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      
+      alert("Station updated successfully!");
+      event.target.reset(); // Clear the form
+            document.getElementById('dashboard').style.display = 'block';
+      event.target.reset();
+    } else {
+      alert(result.message || "Error updating station.");
+    }
+  } catch (error) {
+    console.error("Error updating station:", error);
+    alert("Unexpected error occurred.");
+  }
+});
+document.getElementById("deleteStation").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+
+  try {
+    const response = await fetch("/admin/delete-station", {
+      method: "DELETE",
+      body: JSON.stringify(Object.fromEntries(formData)),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      alert("Station deleted successfully!");
+      event.target.reset();
+    } else {
+      alert(result.message || "Error deleting station.");
+    }
+  } catch (error) {
+    console.error("Error deleting station:", error);
+    alert("Unexpected error occurred.");
+  }
+});
 
   </script>
 </body>

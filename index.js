@@ -5,6 +5,7 @@ const path = require("path");
 require("dotenv").config();
 const pool = require("./config/db");
 const nodemailer = require('nodemailer');
+const adminRoutes = require('./routes/adminRoutes');
 
 const driverRoutes = require("./routes/driverRoutes");
 const app = express();
@@ -37,13 +38,17 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: new MySQLStore({}, pool),
-    cookie: { secure: false, maxAge: 3600000 }, // cookie lasts for 1 hour
+    cookie: { secure: process.env.NODE_ENV === "production", 
+      httpOnly: true,
+      sameSite: "strict", 
+      maxAge: 3600000, }, 
   })
 );
 
 // Use routes
 app.use("/driver", driverRoutes);
-
+// Admin-specific routes
+app.use('/admin', adminRoutes);
 
 app.use(express.static('public'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -65,6 +70,24 @@ app.get('/stations', (req, res) => {
   res.json({ success: true, stations });
 });
 
+
+app.get('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Error destroying session:", err);
+    }
+    res.clearCookie("user_sid");
+    res.redirect("/");
+  });
+});
+
+app.get('/admin/check-session', (req, res) => {
+  if (req.session && req.session.adminLoggedIn) {
+      res.json({ loggedIn: true });
+  } else {
+      res.json({ loggedIn: false });
+  }
+});
 
 app.get('/terms-and-conditions', (req, res) => {
   res.sendFile(__dirname + '/terms-and-conditions.html');
